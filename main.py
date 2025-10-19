@@ -31,8 +31,10 @@ async def generate_voice(request: VoiceRequest):
         # Initialize the client with the API key provided in the request
         eleven_client = AsyncElevenLabs(api_key=request.api_key)
 
-        # Generate the audio stream
-        audio_stream = await eleven_client.text_to_speech.convert(
+        # --- THIS IS THE FIX ---
+        # Removed the incorrect 'await' from the line below.
+        # The 'convert' method returns the generator directly.
+        audio_stream = eleven_client.text_to_speech.convert(
             voice_id=request.voice_id,
             model_id="eleven_v3",
             text=request.text,
