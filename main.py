@@ -31,14 +31,14 @@ async def generate_voice(request: VoiceRequest):
         # Initialize the client with the API key provided in the request
         eleven_client = AsyncElevenLabs(api_key=request.api_key)
 
-        # --- THIS IS THE FIX ---
-        # Removed the incorrect 'await' from the line below.
         # The 'convert' method returns the generator directly.
         audio_stream = eleven_client.text_to_speech.convert(
             voice_id=request.voice_id,
             model_id="eleven_v3",
             text=request.text,
-            output_format="mp3_44100_128",
+            # --- MODIFICATION 1 ---
+            # Changed from mp3_44100_128 to ogg_44100_32 for proper voice notes
+            output_format="ogg_44100_32",
         )
 
         # Assemble the audio chunks from the async stream
@@ -53,8 +53,10 @@ async def generate_voice(request: VoiceRequest):
 
         logger.info("Successfully generated voice stream.")
         
+        # --- MODIFICATION 2 ---
         # Return the audio as a streaming response
-        return StreamingResponse(audio_bytes_io, media_type="audio/mpeg")
+        # Changed media_type from "audio/mpeg" to "audio/ogg"
+        return StreamingResponse(audio_bytes_io, media_type="audio/ogg")
 
     except Exception as e:
         logger.error(f"ElevenLabs API call failed: {e}")
